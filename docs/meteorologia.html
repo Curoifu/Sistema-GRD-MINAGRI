@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="Sistema de Gestión del Riesgo de Desastres del Ministerio de Agricultura de Chile" name="description"/>
+<meta content="index, follow" name="robots"/>
+<title>Sistema GRD - MINAGRI</title>
+<link href="style.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+        #mapa3 {
+            height: 600px;
+            width: 100%;
+        }
+        .filters {
+            margin: 10px 0;
+        }
+    </style>
+<style>
+/* Base styles */
+.hamburger {
+  display: none;
+  font-size: 24px;
+  background: #006837;
+  border: none;
+  cursor: pointer;
+  margin: 10px auto;
+  text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  nav {
+    display: none;
+    flex-direction: column;
+    align-items: left;
+    text-align: center;
+  }
+  nav.open {
+    display: flex;
+  }
+  .hamburger {
+    display: block;
+  }
+}
+</style></head>
+<body>
+<header class="hero-header" style="position: relative; overflow: hidden;"><video autoplay="True" loop="True" muted="True" playsinline="True" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: left center; z-index: -1;"><source src="https://minagri.gob.cl/wp-content/uploads/2023/06/Video-fondo-web-minagri-v2-1.mp4" type="video/mp4"/></video>
+<div class="logo-container" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; max-width: 1200px; margin-left: 10px; auto; position: relative; z-index: 1;">
+<img alt="Logo MINAGRI" class="logo" src="https://minagri.gob.cl/wp-content/uploads/2023/06/Logo-Minagri-Web-Slogan-2024-DK-100.jpg" style="height: 100px; margin-right: 0px;"/>
+<h1 style="flex-grow: 1; text-align: center; color: white; font-size: 2em; margin: 0;">Sistema de Gestión del Riesgo de Desastres</h1>
+</div>
+<button class="hamburger" onclick="toggleMenu()">☰</button><nav>
+<a href="index.html">Inicio</a>
+<a href="monitoreo.html">Monitoreo</a>
+<a href="repositorio.html">Repositorio</a>
+<a href="indicadores.html">Indicadores</a>
+<a href="meteorologia.html">Meteorología</a>
+</nav>
+</header>
+<main class="container">
+<body>
+    
+
+    <h2>Estaciones Meteorológicas en la Región de O’Higgins</h2>
+    <p>Este visor interactivo permite explorar las estaciones meteorológicas de la red AGROMET en la Región de O’Higgins. Puedes filtrar por comuna y altitud máxima.</p>
+    <div class="filters">
+        <label for="comuna">Filtrar por comuna:</label>
+        <select id="comuna">
+            <option value="Todas">Todas</option>
+            <option value="Chimbarongo">Chimbarongo</option><option value="Chépica">Chépica</option><option value="Codegua">Codegua</option><option value="Colchagua">Colchagua</option><option value="Coltauco">Coltauco</option><option value="Graneros">Graneros</option><option value="La Estrella">La Estrella</option><option value="Las Cabras">Las Cabras</option><option value="Litueche">Litueche</option><option value="Lolol">Lolol</option><option value="Malloa">Malloa</option><option value="Marchihue">Marchihue</option><option value="Mostazal">Mostazal</option><option value="Nancagua">Nancagua</option><option value="Navidad">Navidad</option><option value="Olivar">Olivar</option><option value="Palmilla">Palmilla</option><option value="Peralillo">Peralillo</option><option value="Peumo">Peumo</option><option value="Pichilemu">Pichilemu</option><option value="Placilla">Placilla</option><option value="Pumanque">Pumanque</option><option value="Quinta de Tilcoco">Quinta de Tilcoco</option><option value="Rancagua">Rancagua</option><option value="Rengo">Rengo</option><option value="Requínoa">Requínoa</option><option value="San Fernando">San Fernando</option><option value="San Vicente">San Vicente</option><option value="Santa Cruz">Santa Cruz</option><option value="Totihue">Totihue</option>
+        </select>
+        <label for="altitud">Altitud máxima:</label>
+        <input type="number" id="altitud" placeholder="Ej: 500" />
+        <button onclick="filtrar()">Aplicar filtros</button>
+    </div>
+    <div id="mapa3"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const estaciones = [{'name': 'Anakena', 'comuna': 'Requínoa', 'lat': -34.304722222, 'lon': -70.771666667, 'alt': 390}, {'name': 'Casa Silva - Los Lingues', 'comuna': 'San Fernando', 'lat': -34.502222222, 'lon': -70.894722222, 'alt': 318}, {'name': 'Chepica', 'comuna': 'Chépica', 'lat': -34.738611111, 'lon': -71.258055556, 'alt': 194}, {'name': 'Chimbarongo', 'comuna': 'Chimbarongo', 'lat': -34.670833333, 'lon': -71.031666667, 'alt': 320}, {'name': 'Codegua', 'comuna': 'Codegua', 'lat': -34.110277778, 'lon': -70.653611111, 'alt': 507}, {'name': 'Codegua Norte - Ex Rancagua', 'comuna': 'Codegua', 'lat': -34.108888889, 'lon': -70.639583333, 'alt': 531}, {'name': 'Coltauco', 'comuna': 'Coltauco', 'lat': -34.237777778, 'lon': -71.005, 'alt': 318}, {'name': 'Conosur', 'comuna': 'Chimbarongo', 'lat': -34.715555556, 'lon': -71.038611111, 'alt': 302}, {'name': 'El Arenal', 'comuna': 'Quinta de Tilcoco', 'lat': -34.35575, 'lon': -70.991278, 'alt': 265}, {'name': 'El Carmen', 'comuna': 'San Fernando', 'lat': -34.608055556, 'lon': -70.975, 'alt': 359}, {'name': 'El Tambo', 'comuna': 'San Vicente', 'lat': -34.470992, 'lon': -70.986951, 'alt': 245}, {'name': 'Graneros Norte', 'comuna': 'Graneros', 'lat': -34.061944444, 'lon': -70.705, 'alt': 492}, {'name': 'Hacienda Araucano - Lolol', 'comuna': 'Peralillo', 'lat': -34.727222222, 'lon': -71.588888889, 'alt': 118}, {'name': 'Hidango', 'comuna': 'Litueche', 'lat': -34.1, 'lon': -71.8, 'alt': 298}, {'name': 'La Estrella Norte', 'comuna': 'La Estrella', 'lat': -34.21389, 'lon': -71.71167, 'alt': 279}, {'name': 'La Estrella Sur - Ex Pumanque', 'comuna': 'La Estrella', 'lat': -34.213333333, 'lon': -71.716111111, 'alt': 279}, {'name': 'La Rosa Oeste', 'comuna': 'Peumo', 'lat': -34.325, 'lon': -71.239444444, 'alt': 148}, {'name': 'Lapostolle Apalta', 'comuna': 'Santa Cruz', 'lat': -34.593611111, 'lon': -71.302222222, 'alt': 210}, {'name': 'Licanchen', 'comuna': 'Navidad', 'lat': -33.9297485, 'lon': -71.8010025, 'alt': 29}, {'name': 'Liceo Jean Buchanan', 'comuna': 'Peumo', 'lat': -34.3972892, 'lon': -71.1646719, 'alt': 174}, {'name': 'Lolol', 'comuna': 'Lolol', 'lat': -34.713611111, 'lon': -71.629722222, 'alt': 106}, {'name': 'Los Maquis', 'comuna': 'Malloa', 'lat': -34.499722222, 'lon': -70.839722222, 'alt': 470}, {'name': 'Luis Felipe Edwards', 'comuna': 'Colchagua', 'lat': -34.693055556, 'lon': -71.156944444, 'alt': 215}, {'name': 'Luis Felipe Edwards - Pumanque', 'comuna': 'Pumanque', 'lat': -34.640893, 'lon': -71.776318, 'alt': 73}, {'name': 'Marchigue', 'comuna': 'Marchihue', 'lat': -34.405555556, 'lon': -71.607222222, 'alt': 129}, {'name': 'Montes', 'comuna': 'Marchihue', 'lat': -34.340555556, 'lon': -71.652222222, 'alt': 161}, {'name': 'Mostazal', 'comuna': 'Mostazal', 'lat': -34.001666667, 'lon': -70.701666667, 'alt': 489}, {'name': 'Nancagua 2', 'comuna': 'Nancagua', 'lat': -34.660833333, 'lon': -71.283611111, 'alt': 179}, {'name': 'Olivar Alto', 'comuna': 'Olivar', 'lat': -34.203055556, 'lon': -70.824166667, 'alt': 452}, {'name': 'Palmilla', 'comuna': 'Palmilla', 'lat': -34.546666667, 'lon': -71.395, 'alt': 141}, {'name': 'Peumo Norte - Ex Las Cabras', 'comuna': 'Peumo', 'lat': -34.326944444, 'lon': -71.258888889, 'alt': 138}, {'name': 'Placilla Chacarilla', 'comuna': 'Placilla', 'lat': -34.641583, 'lon': -71.135667, 'alt': 238}, {'name': 'Puente Negro', 'comuna': 'Pichilemu', 'lat': -34.386351, 'lon': -71.98571, 'alt': 16}, {'name': 'Punta Cortes', 'comuna': 'Rancagua', 'lat': -34.16975, 'lon': -70.791277778, 'alt': 476}, {'name': 'Quinta Tilcoco', 'comuna': 'Quinta de Tilcoco', 'lat': -34.362, 'lon': -70.935277778, 'alt': 295}, {'name': 'Rapel', 'comuna': 'Las Cabras', 'lat': -34.216666667, 'lon': -71.3, 'alt': 117}, {'name': 'Rayentue', 'comuna': 'Rengo', 'lat': -34.321704, 'lon': -70.833901, 'alt': 370}, {'name': 'Requinoa', 'comuna': 'Requínoa', 'lat': -34.321667, 'lon': -70.833694, 'alt': 370}, {'name': 'San Fernando', 'comuna': 'San Fernando', 'lat': -34.577833333, 'lon': -70.975527778, 'alt': 334}, {'name': 'San Pedro Totihue', 'comuna': 'Totihue', 'lat': -34.341111111, 'lon': -70.727777778, 'alt': 413}, {'name': 'San Vicente de Tagua Tagua', 'comuna': 'San Vicente', 'lat': -34.457777778, 'lon': -71.050555556, 'alt': 216}, {'name': 'Santa Brisila', 'comuna': 'Las Cabras', 'lat': -34.298080556, 'lon': -71.3238, 'alt': 122}, {'name': 'Santa Cruz', 'comuna': 'Santa Cruz', 'lat': -34.690833333, 'lon': -71.4, 'alt': 162}, {'name': 'Siegel', 'comuna': 'San Fernando', 'lat': -34.52545, 'lon': -70.88758, 'alt': 348}, {'name': 'Ventisquero - Peralillo', 'comuna': 'Santa Cruz', 'lat': -34.608055556, 'lon': -71.246944444, 'alt': 127}, {'name': 'Ventisquero Apalta', 'comuna': 'Peralillo', 'lat': -34.394444444, 'lon': -71.445555556, 'alt': 252}, {'name': 'Viu Manent - Peralillo', 'comuna': 'Peralillo', 'lat': -34.495833333, 'lon': -71.491666666, 'alt': 140}];
+
+        const map = L.map('mapa3').setView([-34.5, -71.0], 9);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let markers = [];
+
+        function mostrarEstaciones(filtradas) {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            filtradas.forEach(est => {
+                const marker = L.marker([est.lat, est.lon]).addTo(map)
+                    .bindPopup(`<strong>${est.name}</strong><br>Comuna: ${est.comuna}<br>Altitud: ${est.alt} m`);
+                markers.push(marker);
+            });
+        }
+
+        function filtrar() {
+            const comuna = document.getElementById('comuna').value;
+            const altitud = parseFloat(document.getElementById('altitud').value);
+            const filtradas = estaciones.filter(est => 
+                (comuna === 'Todas' || est.comuna === comuna) &&
+                (!altitud || est.alt <= altitud)
+            );
+            mostrarEstaciones(filtradas);
+        }
+
+        mostrarEstaciones(estaciones);
+    </script>
+</body>
+</main>
+
+<footer>
+    <div class="footer-links">
+        <a href="https://www.facebook.com/MinagriCL/" target="_blank">Facebook</a> |
+        <a href="https://x.com/MinagriCL" target="_blank">Twitter</a> |
+        <a href="https://www.youtube.com/minagrichile" target="_blank">YouTube</a> |
+        <a href="https://www.instagram.com/minagricl/" target="_blank">Instagram</a> |
+        <a href="https://www.flickr.com/photos/minagri/" target="_blank">Flickr</a> |
+        <a href="https://www.linkedin.com/company/ministerio-de-agricultura---chile/posts/?feedView=all" target="_blank">LinkedIn</a>
+    </div>
+    <p>📞 +56 2 2393 5000 | © 2025 Ministerio de Agricultura - Sistema GRD</p>
+</footer>
+</body>
+<script>
+function toggleMenu() {
+  var nav = document.querySelector('nav');
+  if (nav.classList.contains('open')) {
+    nav.classList.remove('open');
+  } else {
+    nav.classList.add('open');
+  }
+}
+</script>
+</html>

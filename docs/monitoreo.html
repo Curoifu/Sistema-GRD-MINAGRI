@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="Sistema de Gestión del Riesgo de Desastres del Ministerio de Agricultura de Chile" name="description"/>
+<meta content="index, follow" name="robots"/>
+<title>Monitoreo Sistema GRD - MINAGRI</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script></head>
+<style>
+/* Base styles */
+.hamburger {
+  display: none;
+  font-size: 24px;
+  background: #006837;
+  border: none;
+  cursor: pointer;
+  margin: 10px auto;
+  text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  nav {
+    display: none;
+    flex-direction: column;
+    align-items: left;
+    text-align: center;
+  }
+  nav.open {
+    display: flex;
+  }
+  .hamburger {
+    display: block;
+  }
+}
+</style></head>
+<body>
+<header class="hero-header" style="position: relative; overflow: hidden;"><video autoplay="True" loop="True" muted="True" playsinline="True" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: left center; z-index: -1;"><source src="https://minagri.gob.cl/wp-content/uploads/2023/06/Video-fondo-web-minagri-v2-1.mp4" type="video/mp4"/></video>
+<div class="logo-container" style="display: flex; align-items: center; justify-content: space-between; padding: 20px; max-width: 1200px; margin-left: 10px; auto; position: relative; z-index: 1;">
+<img alt="Logo MINAGRI" class="logo" src="https://minagri.gob.cl/wp-content/uploads/2023/06/Logo-Minagri-Web-Slogan-2024-DK-100.jpg" style="height: 100px; margin-right: 0px;"/>
+<h1 style="flex-grow: 1; text-align: center; color: white; font-size: 2em; margin: 0;">Sistema de Gestión del Riesgo de Desastres</h1>
+</div>
+<button class="hamburger" onclick="toggleMenu()">☰</button><nav>
+<a href="index.html">Inicio</a>
+<a href="monitoreo.html">Monitoreo</a>
+<a href="repositorio.html">Repositorio</a>
+<a href="indicadores.html">Indicadores</a>
+<a href="meteorologia.html">Meteorología</a>
+</nav>
+</header>
+<main class="container">
+    <section class="intro">
+        <h2>Monitoreo de Amenazas</h2>
+        <p>Esta sección presenta información sobre eventos agroclimáticos, mapas de riesgo y alertas relevantes para el sector agrícola.</p>
+    </section>
+    <div id="mapa" style="height: 500px;"></div>
+    <button onclick="downloadMap()">Descargar Mapa</button>
+    <section class="card">
+        <h2>Gestión de Emergencias</h2>
+<button onclick="exportTableToExcel('tabla1')">Descargar tabla en Excel</button><table id="tabla1">
+<tr><th>Comuna</th><th>Cultivo</th><th>Superficie afectada (ha)</th><th>Grado de daño</th></tr>
+<tr><td>San Fernando</td><td>Vid</td><td>80</td><td>Moderado</td></tr>
+<tr><td>Curicó</td><td>Manzano</td><td>150</td><td>Severo</td></tr>
+<tr><td>Chillán</td><td>Trigo</td><td>200</td><td>Leve</td></tr>
+<tr><td>Puerto Varas</td><td>Papa</td><td>90</td><td>Moderado</td></tr>
+</table>
+<h2>Alertas Activas</h2>
+<button onclick="exportTableToExcel('tabla2')">Descargar tabla en Excel</button><table id="tabla2">
+<tr><th>Evento</th><th>Región</th><th>Nivel</th><th>Fecha</th></tr>
+<tr><td>Helada</td><td>Metropolitana</td><td>Rojo</td><td>2025-07-10</td></tr>
+<tr><td>Incendio</td><td>Valparaíso</td><td>Amarillo</td><td>2025-07-11</td></tr>
+<tr><td>Sequía</td><td>Maule</td><td>Rojo</td><td>2025-07-12</td></tr>
+</table>
+<h2>Reportes Automatizados</h2>
+<button onclick="exportTableToExcel('tabla3')">Descargar tabla en Excel</button><table id="tabla3">
+<tr><th>Región</th><th>Evento</th><th>Fecha</th><th>Superficie afectada (ha)</th></tr>
+<tr><td>Valparaíso</td><td>Helada</td><td>2025-06-01</td><td>120</td></tr>
+<tr><td>Maule</td><td>Incendio</td><td>2025-06-03</td><td>450</td></tr>
+<tr><td>Ñuble</td><td>Sequía</td><td>2025-06-05</td><td>300</td></tr>
+<tr><td>Los Lagos</td><td>Inundación</td><td>2025-06-07</td><td>210</td></tr>
+</table>
+
+</div>
+<script>
+  var map = L.map('mapa').setView([-33.4569, -70.6483], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  L.marker([-33.4569, -70.6483]).addTo(map).bindPopup('Helada severa - Región Metropolitana');
+  L.marker([-33.45, -70.65]).addTo(map).bindPopup('Helada - Rojo');
+  L.marker([-33.04, -71.61]).addTo(map).bindPopup('Incendio - Amarillo');
+  L.marker([-35.43, -71.22]).addTo(map).bindPopup('Sequía - Rojo');
+function downloadMap() {
+    domtoimage.toBlob(document.getElementById('mapa'))
+        .then(function(blob) {
+            window.saveAs(blob, 'mapa_eventos.png');
+        });
+}
+</script>
+    </section>
+
+
+</script>
+
+<script>
+
+function exportTableToExcel(tableId, filename = 'tabla.xlsx') {
+    var table = document.getElementById(tableId);
+    var wb = XLSX.utils.table_to_book(table, {sheet:"Sheet1"});
+    XLSX.writeFile(wb, filename);
+}
+</script>
+
+</main>
+
+<footer>
+    <div class="footer-links">
+        <a href="https://www.facebook.com/MinagriCL/" target="_blank">Facebook</a> |
+        <a href="https://x.com/MinagriCL" target="_blank">Twitter</a> |
+        <a href="https://www.youtube.com/minagrichile" target="_blank">YouTube</a> |
+        <a href="https://www.instagram.com/minagricl/" target="_blank">Instagram</a> |
+        <a href="https://www.flickr.com/photos/minagri/" target="_blank">Flickr</a> |
+        <a href="https://www.linkedin.com/company/ministerio-de-agricultura---chile/posts/?feedView=all" target="_blank">LinkedIn</a>
+    </div>
+    <p>📞 +56 2 2393 5000 | © 2025 Ministerio de Agricultura - Sistema GRD</p>
+</footer>
+<script>
+function toggleMenu() {
+  var nav = document.querySelector('nav');
+  if (nav.classList.contains('open')) {
+    nav.classList.remove('open');
+  } else {
+    nav.classList.add('open');
+  }
+}
+</script></body>
+</html>
